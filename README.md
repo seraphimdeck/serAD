@@ -9,15 +9,6 @@
 - Passive AD & AD CS Detection: Identifies ESC1, ESC3, ESC6, ESC8, Kerberoasting, AS-REP Roasting, and Delegation risks (Unconstrained, Constrained, RBCD).
 - Interface-Driven Reporter (pkg/reporter): Supports Terminal (color-coded), Markdown (detailed audit reports), and JSON (SIEM integration).
 
-serAD/
-├── cmd/serAD/          # CLI entrypoint
-├── pkg/detectors/      # Vulnerability detection logic (AD CS & AD Core)
-├── pkg/gatekeeper/     # Scope validation & network safety checks
-├── pkg/http/           # Passive Web Enrollment probes
-├── pkg/ldap/           # AD objects and PKI harvester via LDAP
-├── pkg/models/         # Data structures and Findings
-└── pkg/reporter/       # Terminal, MD, and JSON reporters
-
 ## Installation, Usage & Security Disclaimer
 
 To build from source, run:
