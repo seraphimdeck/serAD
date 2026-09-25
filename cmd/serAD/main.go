@@ -13,6 +13,26 @@ import (
 	"serAD/pkg/reporter"
 )
 
+const (
+	Reset  = "\033[0m"
+	Red    = "\033[31m"
+	Green  = "\033[32m"
+	Yellow = "\033[33m"
+	Blue   = "\033[34m"
+	Cyan   = "\033[36m"
+	Bold   = "\033[1m"
+)
+
+const Banner = `
+ ██████╗███████╗██████╗  █████╗ ██████╗ 
+██╔════╝██╔════╝██╔══██╗██╔══██╗██╔══██╗
+███████╗█████╗  ██████╔╝███████║██║  ██║
+╚════██║██╔══╝  ██╔══██╗██╔══██║██║  ██║
+███████║███████╗██║  ██║██║  ██║██████╔╝
+╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝  v1.0.0
+ Active Directory & AD CS Audit Engine
+`
+
 func main() {
 	targetIP := flag.String("target", "", "IP Address Target Domain Controller")
 	port := flag.Int("port", 389, "Port LDAP / LDAPS (default 389)")
@@ -22,70 +42,78 @@ func main() {
 	outMD := flag.String("out-md", "audit_report.md", "Nama file laporan Markdown")
 	outJSON := flag.String("out-json", "audit_report.json", "Nama file laporan JSON")
 
+	flag.Usage = func() {
+		fmt.Printf("%s%s%s\n", Cyan, Banner, Reset)
+		fmt.Printf("%sPenggunaan:%s ./serAD -target <IP> -user <USER> -pass <PASS> [opsi]\n\n", Bold+Yellow, Reset)
+		fmt.Printf("%sOpsi Parameter:%s\n", Bold, Reset)
+		flag.PrintDefaults()
+	}
+
 	flag.Parse()
 
 	if *targetIP == "" || *bindDN == "" || *password == "" {
-		fmt.Println("Penggunaan: go run cmd/serAD/main.go -target <IP> -user <USER> -pass <PASS> [opsi]")
-		flag.PrintDefaults()
+		flag.Usage()
 		os.Exit(1)
 	}
 
-	fmt.Println("[*] Memulai Pre-Audit Gatekeeper Safety Checks...")
+	fmt.Printf("%s%s%s\n", Cyan, Banner, Reset)
+
+	fmt.Printf("%s[*] Memulai Pre-Audit Gatekeeper Safety Checks...%s\n", Bold+Blue, Reset)
 	gk := gatekeeper.New(*targetIP, *port)
 	if err := gk.Validate(); err != nil {
-		log.Fatalf("[FATAL] Gatekeeper Validation GAGAL: %v", err)
+		log.Fatalf("%s[FATAL] Gatekeeper Validation GAGAL: %v%s", Bold+Red, err, Reset)
 	}
-	fmt.Println("[+] Gatekeeper Check PASS: Target valid, privat, dan berada dalam segmen LAN lokal.")
+	fmt.Printf("%s[+] Gatekeeper Check PASS: Target valid, privat, dan berada dalam segmen LAN lokal.%s\n", Green, Reset)
 
-	fmt.Println("[*] Menghubungi LDAP Server...")
+	fmt.Printf("%s[*] Menghubungi LDAP Server...%s\n", Bold+Blue, Reset)
 	client, err := ldap.NewClient(*targetIP, *port, *useTLS, *bindDN, *password)
 	if err != nil {
-		log.Fatalf("[FATAL] Koneksi LDAP GAGAL: %v", err)
+		log.Fatalf("%s[FATAL] Koneksi LDAP GAGAL: %v%s", Bold+Red, err, Reset)
 	}
 	defer client.Close()
-	fmt.Printf("[+] Terhubung ke LDAP (BaseDN: %s)\n", client.BaseDN)
+	fmt.Printf("%s[+] Terhubung ke LDAP (BaseDN: %s)%s\n", Green, client.BaseDN, Reset)
 
-	fmt.Println("[*] Mengumpulkan data PKI & Active Directory Domain...")
+	fmt.Printf("%s[*] Mengumpulkan data PKI & Active Directory Domain...%s\n", Bold+Blue, Reset)
 	templates, cas, err := client.HarvestPKI()
 	if err != nil {
-		log.Printf("[WARN] Gagal mengambil data PKI: %v", err)
+		log.Printf("%s[WARN] Gagal mengambil data PKI: %v%s", Yellow, err, Reset)
 	}
 
 	users, computers, err := client.HarvestDomain()
 	if err != nil {
-		log.Printf("[WARN] Gagal mengambil data Domain Users/Computers: %v", err)
+		log.Printf("%s[WARN] Gagal mengambil data Domain Users/Computers: %v%s", Yellow, err, Reset)
 	}
 
-	fmt.Println("[*] Menjalankan HTTP ESC8 Web Enrollment Probe...")
+	fmt.Printf("%s[*] Menjalankan HTTP ESC8 Web Enrollment Probe...%s\n", Bold+Blue, Reset)
 	probe := http.NewProbeClient()
 	for i := range cas {
 		finding, err := probe.CheckESC8(&cas[i])
 		if err != nil {
-			log.Printf("[WARN] ESC8 Probe error pada %s: %v", cas[i].DNSHostName, err)
+			log.Printf("%s[WARN] ESC8 Probe error pada %s: %v%s", Yellow, cas[i].DNSHostName, err, Reset)
 		}
 		if finding != nil {
-			log.Printf("[!] ESC8 Terdeteksi pada CA %s", cas[i].Name)
+			log.Printf("%s[!] ESC8 Terdeteksi pada CA %s%s", Bold+Red, cas[i].Name, Reset)
 		}
 	}
 
-	fmt.Println("[*] Mengeksekusi Detection Engine...")
+	fmt.Printf("%s[*] Mengeksekusi Detection Engine...%s\n", Bold+Blue, Reset)
 	engine := detectors.NewEngine(users, computers, templates, cas)
 	findings := engine.RunAll()
 
-	fmt.Println("[*] Mencetak Laporan...")
+	fmt.Printf("%s[*] Mencetak Laporan...%s\n", Bold+Blue, Reset)
 	reporter.PrintTerminal(findings)
 
 	if err := reporter.ExportMarkdown(*outMD, findings); err != nil {
-		log.Printf("[WARN] Gagal membuat laporan Markdown: %v", err)
+		log.Printf("%s[WARN] Gagal membuat laporan Markdown: %v%s", Yellow, err, Reset)
 	} else {
-		fmt.Printf("[+] Laporan Markdown tersimpan: %s\n", *outMD)
+		fmt.Printf("%s[+] Laporan Markdown tersimpan: %s%s\n", Green, *outMD, Reset)
 	}
 
 	if err := reporter.ExportJSON(*outJSON, findings); err != nil {
-		log.Printf("[WARN] Gagal membuat laporan JSON: %v", err)
+		log.Printf("%s[WARN] Gagal membuat laporan JSON: %v%s", Yellow, err, Reset)
 	} else {
-		fmt.Printf("[+] Laporan JSON tersimpan: %s\n", *outJSON)
+		fmt.Printf("%s[+] Laporan JSON tersimpan: %s%s\n", Green, *outJSON, Reset)
 	}
 
-	fmt.Println("[+] Proses Audit Selesai.")
+	fmt.Printf("%s[+] Proses Audit Selesai.%s\n", Bold+Green, Reset)
 }
