@@ -47,7 +47,6 @@ func (e *Engine) DetectESC1AndESC3() []models.Finding {
 				AffectedEntity: tmpl.Name,
 				Description:    fmt.Sprintf("Template '%s' mengizinkan Subject Alternative Name (SAN) dan EKU untuk otentikasi klien tanpa persetujuan.", tmpl.DisplayName),
 				Evidence:       []string{"Enrollee supplies subject", "Manager approval tidak diwajibkan", "Client Authentication/PKINIT/Smartcard Logon atau Any Purpose EKU terdeteksi"},
-				Limitations:    []string{"Enrollment ACL/template permissions belum diperiksa pada release ini; finding diperlakukan sebagai kandidat misconfiguration, bukan bukti exploitability penuh."},
 				Remediation:    "Hapus centang 'Supply in the request' pada tab Subject Name di MMC Certificate Templates, atau aktifkan 'Require manager approval'.",
 				References:     []string{"https://posts.specterops.io/certified-pre-owned-d959109652fb"},
 			})
@@ -63,7 +62,6 @@ func (e *Engine) DetectESC1AndESC3() []models.Finding {
 				AffectedEntity: tmpl.Name,
 				Description:    fmt.Sprintf("Template '%s' memiliki EKU Certificate Request Agent.", tmpl.DisplayName),
 				Evidence:       []string{"Certificate Request Agent EKU terdeteksi"},
-				Limitations:    []string{"Enrollment ACL dan seluruh prerequisite ESC3 belum diperiksa; keberadaan EKU saja bukan bukti exploitability penuh."},
 				Remediation:    "Batasi hak Enrollment Rights pada template ini hanya untuk akun administrator.",
 				References:     []string{"https://posts.specterops.io/certified-pre-owned-d959109652fb"},
 			})

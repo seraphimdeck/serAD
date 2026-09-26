@@ -27,7 +27,6 @@ type Finding struct {
 	AffectedEntity string     `json:"affected_entity"`
 	Description    string     `json:"description"`
 	Evidence       []string   `json:"evidence,omitempty"`
-	Limitations    []string   `json:"limitations,omitempty"`
 	Remediation    string     `json:"remediation"`
 	References     []string   `json:"references"`
 }

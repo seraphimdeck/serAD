@@ -64,7 +64,7 @@ func main() {
 
 	if *passwordStdin {
 		if *password != "" {
-			log.Fatal("gunakan salah satu -pass atau -password-stdin, bukan keduanya")
+			log.Fatal("gunakan salah satu -pass atau -password-stdin")
 		}
 		reader := bufio.NewReader(os.Stdin)
 		value, err := reader.ReadString('\n')
@@ -92,7 +92,7 @@ func main() {
 
 	fmt.Printf("%s[*] Menghubungi LDAP Server...%s\n", Bold+Blue, Reset)
 	if !*useTLS {
-		fmt.Printf("%s[WARN] LDAP bind menggunakan koneksi plaintext. Untuk production gunakan -tls dan validasi sertifikat.%s\n", Yellow, Reset)
+		fmt.Printf("%s[WARN] LDAP bind menggunakan koneksi plaintext. Gunakan -tls.%s\n", Yellow, Reset)
 	}
 	client, err := ldap.NewClient(*targetIP, *port, *useTLS, *insecureTLS, *tlsServerName, *bindDN, *password)
 	if err != nil {

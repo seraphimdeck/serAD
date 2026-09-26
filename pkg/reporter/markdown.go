@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-
 	"github.com/seraphimdeck/serAD/pkg/models"
 )
 
@@ -48,7 +47,7 @@ func ExportMarkdown(filename string, findings []models.Finding) error {
 		}
 	}
 
-	if err := write("\n## Detail Temuan & Remediasi\n\n"); err != nil {
+	if err := write("\n## Detail Temuan\n\n"); err != nil {
 		return err
 	}
 
@@ -81,16 +80,7 @@ func ExportMarkdown(filename string, findings []models.Finding) error {
 				}
 			}
 		}
-		if len(f.Limitations) > 0 {
-			if err := write("- **Limitasi**:\n"); err != nil {
-				return err
-			}
-			for _, limitation := range f.Limitations {
-				if err := write("  - %s\n", markdownCell(limitation)); err != nil {
-					return err
-				}
-			}
-		}
+    
 		if err := write("- **Panduan Remediasi**: %s\n\n", markdownCell(f.Remediation)); err != nil {
 			return err
 		}

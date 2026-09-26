@@ -22,9 +22,8 @@ func (e *Engine) DetectKerberoast() []models.Finding {
 				Confidence:     models.ConfidenceConfirmed,
 				Category:       "Kerberos",
 				AffectedEntity: user.SAMAccountName,
-				Description:    fmt.Sprintf("Akun pengguna '%s' memiliki SPN dikonfigurasi: %v. Kondisi ini membuat akun dapat menjadi target Kerberoasting.", user.SAMAccountName, user.ServicePrincipalName),
+				Description:    fmt.Sprintf("Akun pengguna '%s' memiliki SPN dikonfigurasi: %v.", user.SAMAccountName, user.ServicePrincipalName),
 				Evidence:       []string{fmt.Sprintf("servicePrincipalName=%v", user.ServicePrincipalName)},
-				Limitations:    []string{"Keberadaan SPN tidak membuktikan password dapat di-crack atau bahwa akun pasti berisiko tinggi; kekuatan password dan konteks akun perlu ditinjau."},
 				Remediation:    "Gunakan gMSA atau pastikan kata sandi akun pengguna ini menggunakan kompleksitas tinggi (25 karakter).",
 				References:     []string{"https://adsecurity.org/?p=2293"},
 			})

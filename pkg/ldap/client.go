@@ -3,7 +3,6 @@ package ldap
 import (
 	"crypto/tls"
 	"fmt"
-
 	"github.com/go-ldap/ldap/v3"
 )
 
@@ -13,9 +12,6 @@ type Client struct {
 	ConfigDN string
 }
 
-// NewClient connects and binds to LDAP. When TLS is enabled, certificate
-// verification is enabled by default. insecureTLS is intentionally explicit
-// and should only be used in controlled lab/troubleshooting environments.
 func NewClient(server string, port int, useTLS, insecureTLS bool, tlsServerName, bindDN, password string) (*Client, error) {
 	addr := fmt.Sprintf("%s:%d", server, port)
 	var conn *ldap.Conn
@@ -28,7 +24,7 @@ func NewClient(server string, port int, useTLS, insecureTLS bool, tlsServerName,
 		tlsConfig := &tls.Config{
 			MinVersion:         tls.VersionTLS12,
 			ServerName:         tlsServerName,
-			InsecureSkipVerify: insecureTLS, // #nosec G402 -- explicit CLI opt-in for lab use only.
+			InsecureSkipVerify: insecureTLS,
 		}
 		conn, err = ldap.DialTLS("tcp", addr, tlsConfig)
 	} else {

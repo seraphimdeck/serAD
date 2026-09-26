@@ -51,8 +51,7 @@ func (p *ProbeClient) CheckESC8(ca *models.EnterpriseCA) (*models.Finding, error
 			AffectedEntity: ca.DNSHostName,
 			Description:    fmt.Sprintf("Enterprise CA '%s' merespons HTTP Web Enrollment pada %s dan mengiklankan NTLM/Negotiate.", ca.Name, targetURL),
 			Evidence:       []string{fmt.Sprintf("HTTP status=%d", resp.StatusCode), fmt.Sprintf("WWW-Authenticate=%v", authHeaders)},
-			Limitations:    []string{"Probe ini tidak membuktikan EPA disabled atau seluruh prerequisite ESC8; HTTPS endpoint dan enrollment permissions perlu dinilai terpisah."},
-			Remediation:    "Nonaktifkan layanan HTTP Web Enrollment jika tidak digunakan. Jika dibutuhkan, gunakan HTTPS/TLS dan evaluasi Extended Protection for Authentication (EPA) serta kebutuhan NTLM.",
+			Remediation:    "Nonaktifkan layanan HTTP Web Enrollment jika tidak digunakan. Gunakan HTTPS/TLS dan evaluasi Extended Protection for Authentication (EPA) serta kebutuhan NTLM.",
 			References:     []string{"https://posts.specterops.io/certified-pre-owned-d959109652fb"},
 		}
 		return finding, nil
