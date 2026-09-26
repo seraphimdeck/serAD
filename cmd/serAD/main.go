@@ -32,7 +32,7 @@ const Banner = `
 ███████╗█████╗  ██████╔╝███████║██║  ██║
 ╚════██║██╔══╝  ██╔══██╗██╔══██║██║  ██║
 ███████║███████╗██║  ██║██║  ██║██████╔╝
-╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝  v1.0.3
+╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝  v1.0.4
  Active Directory & AD CS Audit Engine
 `
 
@@ -42,7 +42,7 @@ func main() {
 	useTLS := flag.Bool("tls", false,"")
 	insecureTLS := flag.Bool("insecure-tls", false, "")
 	tlsServerName := flag.String("tls-server-name", "", "")
-	bindDN := flag.String("user", "", "Username / Bind DN")
+	bindDN := flag.String("user", "", "")
 	password := flag.String("pass", "", "")
 	passwordStdin := flag.Bool("password-stdin", false, "")
 	outMD := flag.String("out-md", "audit_report.md", "")
