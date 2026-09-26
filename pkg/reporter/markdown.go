@@ -11,7 +11,7 @@ func markdownCell(value string) string {
 	return strings.NewReplacer("\\", "\\\\", "|", "\\|", "\r", "", "\n", "<br>").Replace(value)
 }
 
-func ExportMarkdown(filename string, findings []models.Finding) error {
+func ExportMarkdown(filename string, findings []models.Finding, meta models.AuditMetadata) error {
 	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return fmt.Errorf("gagal membuat file markdown: %w", err)
@@ -29,6 +29,24 @@ func ExportMarkdown(filename string, findings []models.Finding) error {
 	if err := write("# Active Directory & AD CS Security Audit Report\n\n"); err != nil {
 		return err
 	}
+  if err := write("## Audit Metadata\n\n"); err != nil {
+        return err
+  }
+  if err := write("| Tanggal/Waktu | %s |\n", markdownCell(meta.Timestamp)); err != nil {
+        return err
+  }
+  if err := write("| Hostname | %s |\n", markdownCell(meta.Hostname)); err != nil {
+        return err
+  }
+  if err := write("| Operator | %s |\n", markdownCell(meta.Operator)); err != nil {
+        return err
+  }
+  if err := write("| Target DC | %s |\n", markdownCell(meta.TargetDC)); err != nil {
+        return err
+  }
+  if err := write("| Port | %d |\n\n", meta.Port); err != nil {
+        return err
+  }
 	if err := write("**Total Temuan**: %d\n\n", len(findings)); err != nil {
 		return err
 	}

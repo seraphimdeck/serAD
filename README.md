@@ -20,9 +20,9 @@ Or install directly via:
 go install github.com/seraphimdeck/serAD/cmd/serAD@latest
 
 To execute a standard audit scan:
-./serAD -d domain.local -u auditor_user -p 'Password123!' -dc-ip 192.168.1.10
+./serAD -target domain.local -user auditor_user -pass 'Password123!' -dc-ip 192.168.1.10
 
 To export results directly to Markdown and JSON:
-./serAD -d domain.local -u auditor_user -p 'Password123!' -dc-ip 192.168.1.10 -o report.md -json report.json
+./serAD -target domain.local -user auditor_user -pass 'Password123!' -dc-ip 192.168.1.10 -o report.md -json report.json
 
 serAD is strictly a passive (read-only) audit tool performing LDAP queries and passive HTTP probes without modifying Active Directory objects or requesting certificates. Usage must comply with official permissions and applicable laws. Licensed under the MIT License.

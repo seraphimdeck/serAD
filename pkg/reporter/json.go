@@ -7,8 +7,18 @@ import (
 	"github.com/seraphimdeck/serAD/pkg/models"
 )
 
-func ExportJSON(filename string, findings []models.Finding) error {
-	data, err := json.MarshalIndent(findings, "", "  ")
+type Report struct {
+  Metadata models.AuditMetadata `json:"metadata"`
+  Findings []models.Finding `json:"findings"`
+}
+
+func ExportJSON(filename string, findings []models.Finding, meta models.AuditMetadata) error {
+  report := Report{
+    Metadata: meta,
+    Findings: findings,
+  }
+  
+	data, err := json.MarshalIndent(report, "", "  ")
 	if err != nil {
 		return fmt.Errorf("gagal merubah data temuan ke JSON: %w", err)
 	}

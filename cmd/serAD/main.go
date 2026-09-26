@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+  "time"
 	"os"
 	"strings"
 
@@ -25,14 +26,14 @@ const (
 	Cyan   = "\033[36m"
 	Bold   = "\033[1m"
 )
-
+const Version= "1.0.7"
 const Banner = `
  ██████╗███████╗██████╗  █████╗ ██████╗ 
 ██╔════╝██╔════╝██╔══██╗██╔══██╗██╔══██╗
 ███████╗█████╗  ██████╔╝███████║██║  ██║
 ╚════██║██╔══╝  ██╔══██╗██╔══██║██║  ██║
 ███████║███████╗██║  ██║██║  ██║██████╔╝
-╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝  v1.0.6
+╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝  V` + Version + `
  Active Directory & AD CS Audit Engine
 `
 
@@ -74,13 +75,19 @@ func main() {
 		}
 	}
 
+  showVersion := flag.Bool("version", false, "Tampilkan versi")
 	flag.Usage = printShortUsage
 	flag.Parse()
 
+  if *showVersion {
+    fmt.Printf("serAD v%s\n", Version)
+    os.Exit(0)
+  }
 	if *targetIP == "" || *bindDN == "" || (*password == "" && !*passwordStdin) {
 		flag.Usage()
 		os.Exit(0)
 	}
+
 
 	if *passwordStdin {
 		if *password != "" {
@@ -101,8 +108,19 @@ func main() {
 		log.Fatal("-insecure-tls hanya valid bersama -tls")
 	}
 
+
 	fmt.Printf("%s%s%s\n", Cyan, Banner, Reset)
 
+  hostname, _ := os.Hostname()
+  meta := models.AuditMetadata{
+    Timestamp: time.Now().Format("2006-01-02 15:04:05 MST"),
+    Hostname:  hostname,
+    Operator:  *bindDN,
+    TargetDC:  *targetIP,
+    Port:      *port,
+  }
+
+  
 	fmt.Printf("%s[*] Memulai Pre-Audit Gatekeeper Safety Checks...%s\n", Bold+Blue, Reset)
 	gk := gatekeeper.New(*targetIP, *port)
 	if err := gk.Validate(); err != nil {
@@ -154,13 +172,13 @@ func main() {
 	fmt.Printf("%s[*] Mencetak Laporan...%s\n", Bold+Blue, Reset)
 	reporter.PrintTerminal(findings)
 
-	if err := reporter.ExportMarkdown(*outMD, findings); err != nil {
+	if err := reporter.ExportMarkdown(*outMD, findings, meta); err != nil {
 		log.Printf("%s[WARN] Gagal membuat laporan Markdown: %v%s", Yellow, err, Reset)
 	} else {
 		fmt.Printf("%s[+] Laporan Markdown tersimpan: %s%s\n", Green, *outMD, Reset)
 	}
 
-	if err := reporter.ExportJSON(*outJSON, findings); err != nil {
+	if err := reporter.ExportJSON(*outJSON, findings, meta); err != nil {
 		log.Printf("%s[WARN] Gagal membuat laporan JSON: %v%s", Yellow, err, Reset)
 	} else {
 		fmt.Printf("%s[+] Laporan JSON tersimpan: %s%s\n", Green, *outJSON, Reset)
