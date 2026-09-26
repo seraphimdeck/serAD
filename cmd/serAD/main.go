@@ -37,20 +37,20 @@ const Banner = `
 `
 
 func main() {
-	targetIP := flag.String("target", "", "IP Address Target Domain Controller")
+	targetIP := flag.String("target", "", "")
 	port := flag.Int("port", 389, "Port LDAP / LDAPS (default 389)")
-	useTLS := flag.Bool("tls", false, "Gunakan LDAPS (TLS)")
-	insecureTLS := flag.Bool("insecure-tls", false, "NONAKTIFKAN verifikasi sertifikat TLS (hanya untuk lab/troubleshooting)")
-	tlsServerName := flag.String("tls-server-name", "", "Nama DNS server untuk validasi sertifikat TLS (opsional)")
+	useTLS := flag.Bool("tls", false,"")
+	insecureTLS := flag.Bool("insecure-tls", false, "")
+	tlsServerName := flag.String("tls-server-name", "", "")
 	bindDN := flag.String("user", "", "Username / Bind DN")
-	password := flag.String("pass", "", "Password (hindari di CLI; gunakan -password-stdin)")
-	passwordStdin := flag.Bool("password-stdin", false, "Baca password dari stdin tanpa menaruhnya di process arguments")
-	outMD := flag.String("out-md", "audit_report.md", "Nama file laporan Markdown")
-	outJSON := flag.String("out-json", "audit_report.json", "Nama file laporan JSON")
+	password := flag.String("pass", "", "")
+	passwordStdin := flag.Bool("password-stdin", false, "")
+	outMD := flag.String("out-md", "audit_report.md", "")
+	outJSON := flag.String("out-json", "audit_report.json", "")
 
 	flag.Usage = func() {
 		fmt.Printf("%s%s%s\n", Cyan, Banner, Reset)
-		fmt.Printf("%sPenggunaan:%s ./serAD -target <IP> -user <USER> -pass <PASS> [opsi]\n\n", Bold+Yellow, Reset)
+		fmt.Printf("%sUse:%s ./serAD -target <IP> -user <USER> -pass <PASS> [opsi]\n\n", Bold+Yellow, Reset)
 		fmt.Printf("%sOpsi Parameter:%s\n", Bold, Reset)
 		flag.PrintDefaults()
 	}
