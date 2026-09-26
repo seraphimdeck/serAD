@@ -1,0 +1,92 @@
+package ldap
+
+import (
+	"github.com/seraphimdeck/serAD/pkg/models"
+	"strconv"
+)
+
+func (c *Client) HarvestDomain() ([]models.User, []models.Computer, error) {
+	users, err := c.harvestUsers()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	computers, err := c.harvestComputers()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return users, computers, nil
+}
+
+func (c *Client) harvestUsers() ([]models.User, error) {
+	attrs := []string{
+		"sAMAccountName", "distinguishedName", "userAccountControl",
+		"servicePrincipalName", "adminCount",
+	}
+
+	filter := "(&(objectCategory=person)(objectClass=user))"
+	entries, err := c.SearchPaged(c.BaseDN, filter, attrs, 500)
+	if err != nil {
+		return nil, err
+	}
+
+	var users []models.User
+	for _, entry := range entries {
+		uac, _ := strconv.ParseUint(entry.GetAttributeValue("userAccountControl"), 10, 32)
+		adminCount, _ := strconv.Atoi(entry.GetAttributeValue("adminCount"))
+
+		enabled := (uac & 2) == 0
+		dontReqPreauth := (uac & 0x00400000) != 0
+
+		user := models.User{
+			SAMAccountName:       entry.GetAttributeValue("sAMAccountName"),
+			DN:                   entry.DN,
+			UserAccountControl:   uint32(uac),
+			ServicePrincipalName: entry.GetAttributeValues("servicePrincipalName"),
+			AdminCount:           adminCount,
+			DontReqPreauth:       dontReqPreauth,
+			Enabled:              enabled,
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
+func (c *Client) harvestComputers() ([]models.Computer, error) {
+	attrs := []string{
+		"sAMAccountName", "dNSHostName", "distinguishedName",
+		"userAccountControl", "msDS-AllowedToDelegateTo", "msDS-AllowedToActOnBehalfOfOtherIdentity",
+	}
+
+	filter := "(objectClass=computer)"
+	entries, err := c.SearchPaged(c.BaseDN, filter, attrs, 500)
+	if err != nil {
+		return nil, err
+	}
+
+	var computers []models.Computer
+	for _, entry := range entries {
+		uac, _ := strconv.ParseUint(entry.GetAttributeValue("userAccountControl"), 10, 32)
+
+		enabled := (uac & 2) == 0
+		unconstrained := (uac & 0x00080000) != 0
+
+		rbcdRaw := entry.GetRawAttributeValue("msDS-AllowedToActOnBehalfOfOtherIdentity")
+
+		comp := models.Computer{
+			SAMAccountName:       entry.GetAttributeValue("sAMAccountName"),
+			DNSHostName:          entry.GetAttributeValue("dNSHostName"),
+			DN:                   entry.DN,
+			UserAccountControl:   uint32(uac),
+			TrustedForDelegation: unconstrained,
+			AllowedToDelegateTo:  entry.GetAttributeValues("msDS-AllowedToDelegateTo"),
+			RBCDConfigured:       len(rbcdRaw) > 0,
+			Enabled:              enabled,
+		}
+		computers = append(computers, comp)
+	}
+
+	return computers, nil
+}
