@@ -1,6 +1,6 @@
 # serAD
 
-![serAD Terminal Output](assets/assets1.jpg)
+![serAD Terminal Output](assets/assets2.jpg)
 
 **serAD** (*Active Directory Audit Engine*) is a high-performance Active Directory (AD) and Active Directory Certificate Services (AD CS) audit tool written in Go. Designed for Blue Teams, Auditors, and Security Engineers, **serAD** focuses on passive (read-only) security assessments that are safe, fast, and contained, eliminating out-of-scope risks.
 
