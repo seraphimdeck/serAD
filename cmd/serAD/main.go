@@ -53,12 +53,11 @@ func main() {
 		fmt.Printf("%s%s%s\n", Cyan, Banner, Reset)
 		fmt.Printf("%sGunakan:%s ./serAD -target <IP> -user <USER> -pass <PASS> [opsi]\n\n", Bold+Yellow, Reset)
 		fmt.Printf("%sFlag:%s\n", Bold, Reset)
-		
 		flag.VisitAll(func(f *flag.Flag) {
 			fmt.Printf("  -%s\n", f.Name)
 		})
 
-		fmt.Printf("\Gunakan %s./serAD --help%s untuk melihat keterangan lengkap.\n\n", Bold+Yellow, Reset)
+		fmt.Printf("Gunakan %s./serAD --help%s untuk melihat keterangan lengkap.\n\n", Bold+Yellow, Reset)
 	}
 
 	printFullUsage := func() {
