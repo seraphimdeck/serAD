@@ -32,34 +32,55 @@ const Banner = `
 ███████╗█████╗  ██████╔╝███████║██║  ██║
 ╚════██║██╔══╝  ██╔══██╗██╔══██║██║  ██║
 ███████║███████╗██║  ██║██║  ██║██████╔╝
-╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝  v1.0.4
+╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝  v1.0.5
  Active Directory & AD CS Audit Engine
 `
 
 func main() {
-	targetIP := flag.String("target", "", "")
-	port := flag.Int("port", 389, "Port LDAP / LDAPS (default 389)")
-	useTLS := flag.Bool("tls", false,"")
-	insecureTLS := flag.Bool("insecure-tls", false, "")
-	tlsServerName := flag.String("tls-server-name", "", "")
-	bindDN := flag.String("user", "", "")
-	password := flag.String("pass", "", "")
-	passwordStdin := flag.Bool("password-stdin", false, "")
-	outMD := flag.String("out-md", "audit_report.md", "")
-	outJSON := flag.String("out-json", "audit_report.json", "")
 
-	flag.Usage = func() {
+	targetIP := flag.String("target", "", "IP / FQDN Target Domain Controller")
+	port := flag.Int("port", 389, "Port LDAP / LDAPS")
+	useTLS := flag.Bool("tls", false, "Gunakan koneksi LDAPS (TLS)")
+	insecureTLS := flag.Bool("insecure-tls", false, "Abaikan verifikasi sertifikat TLS")
+	tlsServerName := flag.String("tls-server-name", "", "Server Name Indication (SNI) untuk TLS")
+	bindDN := flag.String("user", "", "Bind DN atau Username LDAP")
+	password := flag.String("pass", "", "Password otentikasi LDAP")
+	passwordStdin := flag.Bool("password-stdin", false, "Baca password dari Stdin")
+	outMD := flag.String("out-md", "audit_report.md", "Path file output laporan Markdown")
+	outJSON := flag.String("out-json", "audit_report.json", "Path file output laporan JSON")
+
+	printShortUsage := func() {
 		fmt.Printf("%s%s%s\n", Cyan, Banner, Reset)
-		fmt.Printf("%sUse:%s ./serAD -target <IP> -user <USER> -pass <PASS> [opsi]\n\n", Bold+Yellow, Reset)
-		fmt.Printf("%sOpsi Parameter:%s\n", Bold, Reset)
+		fmt.Printf("%sGunakan:%s ./serAD -target <IP> -user <USER> -pass <PASS> [opsi]\n\n", Bold+Yellow, Reset)
+		fmt.Printf("%sFlag:%s\n", Bold, Reset)
+		
+		flag.VisitAll(func(f *flag.Flag) {
+			fmt.Printf("  -%s\n", f.Name)
+		})
+
+		fmt.Printf("\Gunakan %s./serAD --help%s untuk melihat keterangan lengkap.\n\n", Bold+Yellow, Reset)
+	}
+
+	printFullUsage := func() {
+		fmt.Printf("%s%s%s\n", Cyan, Banner, Reset)
+		fmt.Printf("%sGunakan:%s ./serAD -target <IP> -user <USER> -pass <PASS> [opsi]\n\n", Bold+Yellow, Reset)
+		fmt.Printf("%sOpsi Keterangan:%s\n", Bold, Reset)
 		flag.PrintDefaults()
 	}
 
+	for _, arg := range os.Args[1:] {
+		if arg == "--help" || arg == "-h" || arg == "-help" {
+			printFullUsage()
+			os.Exit(0)
+		}
+	}
+
+	flag.Usage = printShortUsage
 	flag.Parse()
 
 	if *targetIP == "" || *bindDN == "" || (*password == "" && !*passwordStdin) {
 		flag.Usage()
-		os.Exit(1)
+		os.Exit(0)
 	}
 
 	if *passwordStdin {
